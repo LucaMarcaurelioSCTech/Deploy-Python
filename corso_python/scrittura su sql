@@ -1,0 +1,59 @@
+"""
+entrata = True
+
+while (entrata != "x"):
+
+    x = input("Premere 1 per registrarsi , 2 per accedere, 3 per chiudere l'app ")
+    if (x == "1"):
+        print("Per registrarsi bisogna inserire nome, cognome, email e password")
+        nome = input("Inserisci il nome: ")
+        cognome = input("Inserisci il cognome: ")
+        email = input("Inserisci l'email: ")
+        password = input("Inserisci la password: ")
+        print("Ti verrà assegnata un'immagine")
+        immagine = requests.get('https://cataas.com/cat')
+        print("Dati immagine presi in custodia")
+        immagineb64 = base64.b64encode(immagine.content)
+        print("Dati immagine convertiti in b64")
+        immagineb64_string = immagineb64.decode('utf-8')
+
+        cur.execute(sql_insert, (nome, cognome, email , password , immagineb64_string))
+        con.connection.commit()
+        print("Il tuo utente è stato inserito con successo")
+    elif (x == "2"):
+        emailaccesso = input("Inserisci la tua email: ")
+        z=(cur.execute("SELECT * FROM utenti where email = %s",(emailaccesso,)))
+        if (z == 1):
+            passwordaccesso = input("La mail inserita è valida, inserire la password: ")
+            p=(cur.execute("SELECT * FROM utenti where email = %s and password = %s",(emailaccesso, passwordaccesso)))
+            flag = True
+            while(flag):
+                if (p == 1):
+                    print("Hai loggato dentro il tuo utente")
+                    y = input("Premere 1 se si desidera eliminare l'utente, 2 se si desidera fare il logout")
+                    if(y == "1"):
+                        cur.execute("DELETE FROM utenti where email = %s",(emailaccesso,))
+                        con.connection.commit()
+                        print("Il tuo utente è stato eliminato con successo")
+                        flag = False
+                        continue
+                    elif (y=="2"):
+                        flag = False
+                        continue
+                    elif (x != "1" or x != "2" ):
+                        print("Il valore da lei inserito non è valido")
+                        continue
+                elif(p != 1):
+                    print("La tua password non è valida, riprova l'inserimento")
+                    continue
+            
+        elif (z != 1 ):
+            print("La mail da te inserita non è valida per l'accesso")
+            continue   
+
+    elif ( x == "3"):
+        break
+    elif (x != "1" or x != "2"  or x != "3" ):
+        print("Il valore da lei inserito non è valido")
+        continue
+        """
