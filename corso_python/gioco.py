@@ -1,4 +1,4 @@
-import pygame 
+import pygame
 import sys
 import random
 
@@ -6,25 +6,37 @@ import random
 pygame.init()
 
 # Setup dello schermo
-WIDTH, HEIGHT = 500, 400
+WIDTH, HEIGHT = 600, 400
 schermo = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Il mio gioco Pygame")
+pygame.display.set_caption("Snake - Prima Versione")
 
-# Colori e coordinate
+# Colori
 ROSSO = (255, 0, 0)
 NERO = (0, 0, 0)
-x_quadrato = 50
-y_quadrato = 50
-velocita = 5
+VERDE = (0, 255, 0)
 
 
+BLOCK_SIZE = 20 
 
-verde = (0 , 255, 0)
-x_cibo = random.randint(0,400)
-y_cibo = random.randint(0,400)
+x_quadrato = WIDTH / 2  
+y_quadrato = HEIGHT / 2
 
-# Clock per gestire gli FPS
+
+cambio_x = 0
+cambio_y = 0
+
+
+velocita = BLOCK_SIZE 
+
+PUNTEGGIO = 0
+x_cibo = random.randint(0, (WIDTH - BLOCK_SIZE) // BLOCK_SIZE) * BLOCK_SIZE
+y_cibo = random.randint(0, (HEIGHT - BLOCK_SIZE) // BLOCK_SIZE) * BLOCK_SIZE
+
+# Clock
 clock = pygame.time.Clock()
+
+snake_body = []
+lunghezza_snake = 1
 
 # --- IL GAME LOOP ---
 while True:
@@ -34,56 +46,73 @@ while True:
             pygame.quit()
             sys.exit()
 
-        
-        
         if evento.type == pygame.KEYDOWN:
-        
-        # FRECCIA SINISTRA
+            # FRECCIA SINISTRA
             if evento.key == pygame.K_LEFT:
-                # La tua logica "flag": Posso andare a sx solo se NON vado a dx
-                # La logica "codice": Posso cambiare la X solo se la X è ferma (quindi mi muovo su Y)
                 if cambio_x == 0: 
                     cambio_x = -velocita
                     cambio_y = 0
 
             # FRECCIA DESTRA
             elif evento.key == pygame.K_RIGHT:
-                if cambio_x == 0: # Accetto il comando solo se non mi sto già muovendo in orizzontale
+                if cambio_x == 0:
                     cambio_x = velocita
                     cambio_y = 0
 
             # FRECCIA SU
             elif evento.key == pygame.K_UP:
-                if cambio_y == 0: # Accetto il comando solo se mi sto muovendo in orizzontale
+                if cambio_y == 0: 
                     cambio_x = 0
                     cambio_y = -velocita
 
-            # FRECCIA GIÙ
+            
             elif evento.key == pygame.K_DOWN:
                 if cambio_y == 0:
                     cambio_x = 0
                     cambio_y = velocita
-    # B. Logica (Input continuo e Movimento)
-    """
-    tasti = pygame.key.get_pressed()
-    if tasti[pygame.K_RIGHT]:
-        x_quadrato += velocita*3
-    if tasti[pygame.K_LEFT]:
-        x_quadrato -= velocita*3
-    if tasti[pygame.K_DOWN]:
-        y_quadrato += velocita*3
-    if tasti[pygame.K_UP]:
-        y_quadrato -= velocita*3
-    """
-        
-    # C. Disegno (Rendering)
-    schermo.fill(NERO) # 1. Pulisci lo schermo (altrimenti lasci la scia!)
-    pygame.draw.rect(schermo, ROSSO, (x_quadrato, y_quadrato, 40, 40)) # 2. Disegna il quadrato
-    pygame.draw.rect(schermo,verde,(x_cibo,y_cibo, 40 , 40))
-    pygame.display.flip() # 3. Aggiorna il display ("Invia" l'immagine all'utente)
 
+    
     x_quadrato += cambio_x
     y_quadrato += cambio_y
 
+    testa_react = pygame.Rect(x_quadrato,y_quadrato, BLOCK_SIZE , BLOCK_SIZE)
+
+    snake_body.append(testa_react)
+
+    cibo_react = pygame.Rect(x_cibo,y_cibo, BLOCK_SIZE , BLOCK_SIZE)
+
+    if (testa_react.colliderect(cibo_react)):
+        lunghezza_snake +=1
+        x_cibo = random.randint(0, (WIDTH - BLOCK_SIZE) // BLOCK_SIZE) * BLOCK_SIZE
+        y_cibo = random.randint(0, (HEIGHT - BLOCK_SIZE) // BLOCK_SIZE) * BLOCK_SIZE
+        PUNTEGGIO +=1
+        print(PUNTEGGIO)
+
+    
+
+
+    if (len(snake_body) > lunghezza_snake):
+        del snake_body[0]
+
+    for i in snake_body[:-1]:
+        if (testa_react.colliderect(i)):
+            print("Hai perso coglione")
+            pygame.quit()
+            sys.exit()
+        if x_quadrato < 0 or x_quadrato >= WIDTH or y_quadrato < 0 or y_quadrato >= HEIGHT:
+            print("Hai perso!") 
+            pygame.quit()
+            sys.exit()       
+    
+    schermo.fill(NERO) 
+    
+    for pezzo in snake_body:
+        pygame.draw.rect(schermo, ROSSO, pezzo)
+    
+    
+    pygame.draw.rect(schermo, VERDE, (x_cibo, y_cibo, BLOCK_SIZE, BLOCK_SIZE))
+    
+    pygame.display.flip()
+
     # D. Controllo FPS
-    clock.tick(2) 
+    clock.tick(20)
